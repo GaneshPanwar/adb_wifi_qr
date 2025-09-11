@@ -24,11 +24,12 @@
     "vscode": "^1.60.0"
   },
   "displayName": "ADB WiFi / QR Connect",
-  "publisher": "your-name",
+  "publisher": "Ganesh-Panwar",
   "categories": [
     "Other"
   ],
   "activationEvents": [
+    "onCommand:adbWifi.connectAutoWifi",
     "onCommand:adbWifi.connectWifi",
     "onCommand:adbWifi.connectQr",
     "onCommand:adbWifi.listDevices",
@@ -36,6 +37,10 @@
   ],
   "contributes": {
     "commands": [
+      {
+        "command": "adbWifi.connectAutoWifi",
+        "title": "ADB: Connect Auto Wi-Fi"
+      },
       {
         "command": "adbWifi.connectWifi",
         "title": "ADB: Connect via WiFi (IP)"

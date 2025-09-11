@@ -10,7 +10,8 @@ void printHelp() {
       'tcpip': 'Enable tcpip on device: tcpip [port]',
       'connect': 'Connect to device: connect <ip:port>',
       'disconnect': 'Disconnect device: disconnect [ip:port]',
-      'shell': 'Run adb shell command: shell <cmd>'
+      'shell': 'Run adb shell command: shell <cmd>',
+      'wifi_ip_auto': 'Auto-detect device IP and enable Wi-Fi ADB'
     }
   }));
 }
@@ -46,6 +47,8 @@ Future<int> main(List<String> args) async {
           return 2;
         }
         return await _runAdb(['shell', ...args.sublist(1)]);
+      case 'wifi_ip_auto':
+        return await _wifiIpAuto();
       default:
         print(jsonEncode({'error': 'unknown_command', 'message': 'Unknown command: $command'}));
         return 3;
@@ -56,8 +59,41 @@ Future<int> main(List<String> args) async {
   }
 }
 
+Future<int> _wifiIpAuto() async {
+  // List connected USB devices
+  final resultDevices = await Process.run(_adbPath(), ['devices']);
+  final lines = (resultDevices.stdout?.toString() ?? '').split('\n');
+
+  for (var line in lines) {
+    if (line.endsWith('\tdevice')) {
+      final serial = line.split('\t')[0];
+
+      // Enable TCP/IP on port 5555
+      await Process.run(_adbPath(), ['-s', serial, 'tcpip', '5555']);
+
+      // Get device IP from wlan0
+      final ipResult = await Process.run(
+          _adbPath(), ['-s', serial, 'shell', 'ip', '-f', 'inet', 'addr', 'show', 'wlan0']);
+      final ipMatch = RegExp(r'inet (\d+\.\d+\.\d+\.\d+)/').firstMatch(ipResult.stdout ?? '');
+
+      if (ipMatch != null) {
+        final ip = ipMatch.group(1);
+        print(jsonEncode({'serial': serial, 'ip': ip, 'port': '5555'}));
+      } else {
+        print(jsonEncode({'serial': serial, 'error': 'IP not found'}));
+      }
+    }
+  }
+
+  return 0;
+}
+
+String _adbPath() {
+  return Platform.environment['ADB_PATH'] ?? 'adb';
+}
+
 Future<int> _runAdb(List<String> args) async {
-  final adbPath = Platform.environment['ADB_PATH'] ?? 'adb';
+  final adbPath = _adbPath();
   final result = await Process.run(adbPath, args);
   final out = result.stdout?.toString() ?? '';
   final err = result.stderr?.toString() ?? '';
