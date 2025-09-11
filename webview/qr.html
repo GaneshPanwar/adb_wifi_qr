@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ADB QR Scanner</title>
+  <style>
+    body { margin:0; padding:0; font-family: sans-serif; display:flex; flex-direction:column; align-items:center; }
+    #video { width: 640px; max-width: 90vw; border: 1px solid #666; }
+    #canvas { display:none; }
+    #info { margin-top: 8px; }
+    button { margin-top: 8px; padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <h3>Scan QR containing IP:PORT (e.g. 192.168.1.100:5555)</h3>
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas"></canvas>
+  <div id="info">Allow camera and hold the QR code in front of the camera.</div>
+  <button id="stopBtn">Stop</button>
+
+  <script src="./jsqr.min.js"></script>
+
+  <script>
+    const vscode = acquireVsCodeApi ? acquireVsCodeApi() : null;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let streaming = false;
+    let raf;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+        await video.play();
+        streaming = true;
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        tick();
+      } catch (e) {
+        console.error(e);
+        if (vscode) vscode.postMessage({ command: 'error', text: 'Camera permission denied or no camera available.' });
+        document.getElementById('info').innerText = 'Camera error: ' + e.message;
+      }
+    }
+
+    function tick() {
+      if (!streaming) return;
+      try {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = window.jsQR ? jsQR(imageData.data, imageData.width, imageData.height) : null;
+        if (code) {
+          const text = code.data.trim();
+          if (vscode) vscode.postMessage({ command: 'scanned', text });
+          stop();
+          return;
+        }
+      } catch (e) {
+        // ignore decoding errors
+      }
+      raf = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      streaming = false;
+      if (video.srcObject) {
+        const tracks = video.srcObject.getTracks();
+        tracks.forEach(t => t.stop());
+      }
+      if (raf) cancelAnimationFrame(raf);
+      document.getElementById('info').innerText = 'Stopped';
+    }
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      stop();
+    });
+
+    startCamera();
+  </script>
+</body>
+</html>
