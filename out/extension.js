@@ -30,32 +30,36 @@ const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const os = __importStar(require("os"));
 function getSettingAdbPath() {
-    const config = vscode.workspace.getConfiguration('adbWifi');
-    const val = config.get('adbPath');
+    const config = vscode.workspace.getConfiguration("adbWifi");
+    const val = config.get("adbPath");
     return val && val.trim().length > 0 ? val : undefined;
 }
 function findAdbOnCommonPaths() {
     const env = process.env;
     const candidates = [];
     const home = os.homedir();
-    const sdkRoots = [env['ANDROID_SDK_ROOT'], env['ANDROID_HOME'], env['ANDROID_SDK_HOME']];
+    const sdkRoots = [
+        env["ANDROID_SDK_ROOT"],
+        env["ANDROID_HOME"],
+        env["ANDROID_SDK_HOME"],
+    ];
     for (const r of sdkRoots) {
         if (r)
-            candidates.push(path.join(r || '', 'platform-tools', process.platform === 'win32' ? 'adb.exe' : 'adb'));
+            candidates.push(path.join(r || "", "platform-tools", process.platform === "win32" ? "adb.exe" : "adb"));
     }
-    if (process.platform === 'win32') {
-        const local = process.env['LOCALAPPDATA'];
-        const programFiles = process.env['ProgramFiles'];
-        const programFilesx86 = process.env['ProgramFiles(x86)'];
+    if (process.platform === "win32") {
+        const local = process.env["LOCALAPPDATA"];
+        const programFiles = process.env["ProgramFiles"];
+        const programFilesx86 = process.env["ProgramFiles(x86)"];
         if (local)
-            candidates.push(path.join(local, 'Android', 'Sdk', 'platform-tools', 'adb.exe'));
+            candidates.push(path.join(local, "Android", "Sdk", "platform-tools", "adb.exe"));
         if (programFiles)
-            candidates.push(path.join(programFiles, 'Android', 'Sdk', 'platform-tools', 'adb.exe'));
+            candidates.push(path.join(programFiles, "Android", "Sdk", "platform-tools", "adb.exe"));
         if (programFilesx86)
-            candidates.push(path.join(programFilesx86, 'Android', 'Sdk', 'platform-tools', 'adb.exe'));
+            candidates.push(path.join(programFilesx86, "Android", "Sdk", "platform-tools", "adb.exe"));
     }
     else {
-        candidates.push('/usr/bin/adb', '/usr/local/bin/adb', path.join(home, 'Android', 'Sdk', 'platform-tools', 'adb'));
+        candidates.push("/usr/bin/adb", "/usr/local/bin/adb", path.join(home, "Android", "Sdk", "platform-tools", "adb"));
     }
     for (const c of candidates) {
         if (c && fs.existsSync(c))
@@ -75,28 +79,33 @@ async function resolveAdbExecutable() {
 function getHelperPath(context) {
     const extPath = context.extensionPath;
     const platform = process.platform;
-    if (platform === 'win32') {
-        return path.join(extPath, 'bin', 'win', 'adb_helper.exe');
+    let binPath = "";
+    if (platform === "win32")
+        binPath = path.join(extPath, "bin", "win", "adb_helper.exe");
+    else if (platform === "darwin")
+        binPath = path.join(extPath, "bin", "mac", "adb_helper");
+    else
+        binPath = path.join(extPath, "bin", "linux", "adb_helper");
+    if (fs.existsSync(binPath)) {
+        return { cmd: binPath, args: [] };
     }
-    else if (platform === 'darwin') {
-        return path.join(extPath, 'bin', 'mac', 'adb_helper');
-    }
-    else {
-        return path.join(extPath, 'bin', 'linux', 'adb_helper');
-    }
+    // fallback to dart run
+    const dartPath = "dart";
+    const dartArgs = [
+        "run",
+        path.join(extPath, "flutter_backend", "bin", "adb_helper.dart"),
+    ];
+    return { cmd: dartPath, args: dartArgs };
 }
 function runHelper(context, args, adbPath) {
     return new Promise((resolve, reject) => {
         const helper = getHelperPath(context);
-        if (!fs.existsSync(helper)) {
-            reject(new Error(`ADB helper not found at ${helper}. Please compile and place the binary.`));
-            return;
-        }
-        const env = Object.assign({}, process.env);
+        const finalArgs = [...helper.args, ...args]; // combine Dart args + helper args
+        const env = { ...process.env };
         if (adbPath)
-            env['ADB_PATH'] = adbPath;
-        (0, child_process_1.execFile)(helper, args, { maxBuffer: 10 * 1024 * 1024, env }, (err, stdout, stderr) => {
-            if (err && (stdout === undefined || stdout === '')) {
+            env["ADB_PATH"] = adbPath;
+        (0, child_process_1.execFile)(helper.cmd, finalArgs, { maxBuffer: 10 * 1024 * 1024, env }, (err, stdout, stderr) => {
+            if (err && (!stdout || stdout === "")) {
                 reject(err);
                 return;
             }
@@ -104,76 +113,110 @@ function runHelper(context, args, adbPath) {
                 const parsed = JSON.parse(stdout.toString().trim());
                 resolve(parsed);
             }
-            catch (e) {
-                resolve({ stdout: stdout.toString(), stderr: stderr.toString(), error: err ? err.message : undefined });
+            catch {
+                resolve({
+                    stdout: stdout.toString(),
+                    stderr: stderr.toString(),
+                    error: err?.message,
+                });
             }
         });
     });
 }
 function activate(context) {
-    context.subscriptions.push(vscode.commands.registerCommand('adbWifi.listDevices', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand("adbWifi.listDevices", async () => {
         try {
             const adb = await resolveAdbExecutable();
-            const res = await runHelper(context, ['devices'], adb);
-            const channel = vscode.window.createOutputChannel('ADB WiFi');
+            const res = await runHelper(context, ["devices"], adb);
+            const channel = vscode.window.createOutputChannel("ADB WiFi");
             channel.show(true);
             channel.appendLine(JSON.stringify(res, null, 2));
-            vscode.window.showInformationMessage('ADB devices result written to Output (ADB WiFi).');
+            vscode.window.showInformationMessage("ADB devices result written to Output (ADB WiFi).");
         }
         catch (e) {
             vscode.window.showErrorMessage(`Error: ${e.message}`);
         }
-    }), vscode.commands.registerCommand('adbWifi.tcpip', async () => {
-        const port = await vscode.window.showInputBox({ prompt: 'Enter TCP/IP port', value: '5555' });
+    }), vscode.commands.registerCommand("adbWifi.tcpip", async () => {
+        const port = await vscode.window.showInputBox({
+            prompt: "Enter TCP/IP port",
+            value: "5555",
+        });
         if (!port) {
             return;
         }
         try {
             const adb = await resolveAdbExecutable();
-            const res = await runHelper(context, ['tcpip', port], adb);
-            const channel = vscode.window.createOutputChannel('ADB WiFi');
+            const res = await runHelper(context, ["tcpip", port], adb);
+            const channel = vscode.window.createOutputChannel("ADB WiFi");
             channel.show(true);
             channel.appendLine(JSON.stringify(res, null, 2));
-            vscode.window.showInformationMessage('Set device to tcpip mode. See output channel.');
+            vscode.window.showInformationMessage("Set device to tcpip mode. See output channel.");
         }
         catch (e) {
             vscode.window.showErrorMessage(`Error: ${e.message}`);
         }
-    }), vscode.commands.registerCommand('adbWifi.connectWifi', async () => {
-        const ip = await vscode.window.showInputBox({ prompt: 'Enter device IP:PORT (e.g. 192.168.1.100:5555)' });
+    }), vscode.commands.registerCommand("adbWifi.connectWifi", async () => {
+        const ip = await vscode.window.showInputBox({
+            prompt: "Enter device IP:PORT (e.g. 192.168.1.100:5555)",
+        });
         if (!ip) {
             return;
         }
         try {
             const adb = await resolveAdbExecutable();
-            const res = await runHelper(context, ['connect', ip], adb);
+            const res = await runHelper(context, ["connect", ip], adb);
             vscode.window.showInformationMessage(`Connect result: ${res.stdout || JSON.stringify(res)}`);
         }
         catch (e) {
             vscode.window.showErrorMessage(`Error: ${e.message}`);
         }
-    }), vscode.commands.registerCommand('adbWifi.connectQr', async () => {
-        const panel = vscode.window.createWebviewPanel('adbQrScan', 'ADB QR Connect', vscode.ViewColumn.One, {
+    }), vscode.commands.registerCommand("adbWifi.connectAutoWifi", async () => {
+        try {
+            const adb = await resolveAdbExecutable();
+            const res = await runHelper(context, ["wifi_ip_auto"], adb);
+            // stdout may contain multiple JSON lines, one per device
+            const lines = (res.stdout || "").trim().split("\n");
+            for (const line of lines) {
+                try {
+                    const info = JSON.parse(line);
+                    if (info.ip && info.port) {
+                        const connectRes = await runHelper(context, ["connect", `${info.ip}:${info.port}`], adb);
+                        vscode.window.showInformationMessage(`Device ${info.serial} connected to ${info.ip}:${info.port}`);
+                    }
+                    else if (info.error) {
+                        vscode.window.showWarningMessage(`Device ${info.serial} error: ${info.error}`);
+                    }
+                }
+                catch (e) {
+                    console.warn("Failed to parse line from helper:", line);
+                }
+            }
+        }
+        catch (err) {
+            vscode.window.showErrorMessage(`Auto Wi-Fi connect failed: ${err.message}`);
+        }
+    }), vscode.commands.registerCommand("adbWifi.connectQr", async () => {
+        const panel = vscode.window.createWebviewPanel("adbQrScan", "ADB QR Connect", vscode.ViewColumn.One, {
             enableScripts: true,
-            retainContextWhenHidden: false
+            retainContextWhenHidden: false,
         });
-        const htmlPath = path.join(context.extensionPath, 'webview', 'qr.html');
-        let html = fs.readFileSync(htmlPath, 'utf8');
+        const htmlPath = path.join(context.extensionPath, "webview", "qr.html");
+        let html = fs.readFileSync(htmlPath, "utf8");
         panel.webview.html = html;
         panel.webview.onDidReceiveMessage(async (message) => {
-            if (message.command === 'scanned') {
+            if (message.command === "scanned") {
                 const ip = message.text;
                 panel.dispose();
                 try {
                     const adb = await resolveAdbExecutable();
-                    const res = await runHelper(context, ['connect', ip], adb);
+                    const res = await runHelper(context, ["connect", ip], adb);
                     vscode.window.showInformationMessage(`ADB connect: ${res.stdout || JSON.stringify(res)}`);
                 }
                 catch (e) {
                     vscode.window.showErrorMessage(`Error connecting to ${ip}: ${e.message}`);
                 }
             }
-            else if (message.command === 'error') {
+            else if (message.command === "error") {
                 vscode.window.showErrorMessage(`Scanner error: ${message.text}`);
             }
         }, undefined, context.subscriptions);
