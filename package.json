@@ -6,6 +6,10 @@
   "author": "Ganesh Panwar",
   "type": "commonjs",
   "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GaneshPanwar/adb_wifi_qr.git"
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -19,13 +23,11 @@
   "engines": {
     "vscode": "^1.60.0"
   },
-  "repository": {
-  "type": "git",
-  "url": "https://github.com/GaneshPanwar/adb_wifi_qr.git"
-},
   "displayName": "ADB WiFi / QR Connect",
   "publisher": "your-name",
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "onCommand:adbWifi.connectWifi",
     "onCommand:adbWifi.connectQr",
@@ -34,10 +36,22 @@
   ],
   "contributes": {
     "commands": [
-      { "command": "adbWifi.connectWifi", "title": "ADB: Connect via WiFi (IP)" },
-      { "command": "adbWifi.connectQr", "title": "ADB: Connect via QR Code" },
-      { "command": "adbWifi.listDevices", "title": "ADB: List Devices" },
-      { "command": "adbWifi.tcpip", "title": "ADB: Enable TCP/IP on device" }
+      {
+        "command": "adbWifi.connectWifi",
+        "title": "ADB: Connect via WiFi (IP)"
+      },
+      {
+        "command": "adbWifi.connectQr",
+        "title": "ADB: Connect via QR Code"
+      },
+      {
+        "command": "adbWifi.listDevices",
+        "title": "ADB: List Devices"
+      },
+      {
+        "command": "adbWifi.tcpip",
+        "title": "ADB: Enable TCP/IP on device"
+      }
     ],
     "configuration": {
       "type": "object",
