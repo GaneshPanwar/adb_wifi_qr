@@ -34,11 +34,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:adbWifi.connectAutoWifi",
-    "onCommand:adbWifi.connectWifi",
-    "onCommand:adbWifi.connectQr",
-    "onCommand:adbWifi.listDevices",
-    "onCommand:adbWifi.tcpip"
+   
   ],
   "contributes": {
     "commands": [
