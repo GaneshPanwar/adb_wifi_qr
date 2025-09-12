@@ -1,6 +1,6 @@
 {
   "name": "adb-wifi-qr",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Connect Android device over ADB Wi-Fi using IP or by scanning a QR code.",
   "license": "ISC",
   "author": "Ganesh Panwar",
