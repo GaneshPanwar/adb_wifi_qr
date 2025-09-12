@@ -19,7 +19,7 @@ It provides commands to enable TCP/IP, connect/disconnect devices, and also gene
 
 ## 🚀 Installation
 
-1. Download the latest `.vsix` package from the releases (or build manually).
+1. Download the [Latest Version](adb-wifi-qr-0.1.0.vsix)`.vsix` package from the releases (or build manually).
 2. In VSCode, run:
 
    ```bash
