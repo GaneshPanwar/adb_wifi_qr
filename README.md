@@ -27,7 +27,6 @@ It provides commands to enable TCP/IP, connect/disconnect devices, and also gene
 
    ```bash
    code --install-extension adb-wifi-qr-0.1.1.vsix
-````
 
 3. Reload VSCode.
 
@@ -173,3 +172,5 @@ The `.vsix` file will be created in the project root.
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE.md).
+
+````
