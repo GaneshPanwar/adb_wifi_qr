@@ -1,93 +1,175 @@
-# ADB WiFi VSCode Extension
+Here’s the **full `README.md` code** in markdown, ready to use 👇
 
-A Visual Studio Code extension to manage Android devices over **ADB via Wi-Fi**.  
-It supports listing devices, enabling TCP/IP mode, connecting via IP, auto-discovery, and QR code scanning — all directly from VSCode.
+````markdown
+# ADB WiFi Connect VSCode Extension
 
----
-
-## Features
-
-- 📱 **List connected devices** (`adb devices`)  
-- 🌐 **Enable TCP/IP mode** on a device  
-- 🔌 **Connect to device by IP:PORT**  
-- ⚡ **Auto-connect** to all devices on Wi-Fi  
-- 📷 **Scan QR code** (for IP/PORT) and connect instantly  
-- 🔍 **Auto-detects adb executable** from Android SDK, PATH, or custom settings  
+This Visual Studio Code extension helps you connect Android devices over **ADB WiFi** easily.  
+It provides commands to enable TCP/IP, connect/disconnect devices, and also generate QR codes for easier sharing.
 
 ---
 
-## Installation
+## 📦 Features
 
-1. Install the VSIX:
-   - Run:  
-     ```sh
-     code --install-extension adb-wifi.vsix
-     ```
-   - Or from **VSCode → Extensions → Install from VSIX…**
-
-2. Ensure you have **ADB installed**:
-   - Either via [Android SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools)  
-   - Or already in your `PATH`.
-
-3. Optionally, configure custom path:  
-   - Go to **Settings → Extensions → ADB WiFi → adbPath**  
+- 📱 List connected devices (`adb devices`)
+- 📡 Enable WiFi debugging (`adb tcpip 5555`)
+- 🔗 Connect to devices by **IP:PORT**
+- ❌ Disconnect devices
+- 💻 Run ADB shell commands
+- 🔲 Generate **QR code** for `IP:PORT` (scan on another machine/device)
+- 🖥️ Cross-platform helper (Windows, macOS, Linux)
 
 ---
 
-## Commands (Command Palette)
+## 🚀 Installation
 
-Open the **Command Palette** (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) and type:
+1. Download the latest `.vsix` package from the releases (or build manually).
+2. In VSCode, run:
 
-- `ADB WiFi: List Devices`  
-  Shows all connected devices.  
-  ![List Devices](images/devices.png)
+   ```bash
+   code --install-extension adb-wifi-qr-0.1.1.vsix
+````
 
-- `ADB WiFi: TCPIP`  
-  Switches a connected device to TCP/IP mode (default port `5555`).  
-  ![TCPIP](images/tcpip.png)
-
-- `ADB WiFi: Connect WiFi`  
-  Connect manually to `IP:PORT`.  
-  ![Connect WiFi](images/connect.png)
-
-- `ADB WiFi: Auto Connect WiFi`  
-  Finds device IPs and connects automatically.  
-  ![Auto WiFi](images/autoconnect.png)
-
-- `ADB WiFi: Connect via QR`  
-  Scan a QR code containing `IP:PORT` (e.g., `192.168.1.100:5555`) and connect.  
-  ![QR Connect](images/qr.png)
+3. Reload VSCode.
 
 ---
 
-## Typical Workflow (Demo)
+## 🔧 Requirements
 
-1. Connect your device via **USB**.  
-2. Run **`ADB WiFi: List Devices`** → ensure device is visible.  
-3. Run **`ADB WiFi: TCPIP`** → device switches to TCP/IP mode.  
-4. Disconnect USB cable.  
-5. Run **`ADB WiFi: Auto Connect WiFi`** → device connects wirelessly.  
-6. (Optional) Use **`ADB WiFi: Connect via QR`** for faster connections.
+* **Android SDK Platform Tools** (`adb`) must be installed.
+* Ensure `adb` is in your system `PATH`, or set the environment variable `ADB_PATH`.
 
 ---
 
-## Troubleshooting
+## 📖 Usage
 
-- ❌ *“No adb found”*  
-  → Install **platform-tools** and check PATH or set custom path in settings.  
+### 1. Enable WiFi Debugging
 
-- ❌ *“Connection refused”*  
-  → Ensure device and PC are on the same Wi-Fi network, and TCP/IP mode is enabled.  
+1. Connect your device via USB.
+2. Run in command palette (**Ctrl+Shift+P** / **Cmd+Shift+P**):
 
-- ❌ *Auto connect fails*  
-  → Use manual **`Connect WiFi`** with the device IP shown in `adb shell ip addr`.  
+   ```
+   ADB: Enable TCP/IP Mode
+   ```
+
+   This defaults to port `5555`.
 
 ---
 
-## Development
+### 2. Connect via IP\:PORT
 
-Clone repo and install dependencies:
+1. Find your device’s IP in **Settings > About phone > Status > IP address**.
+2. Run:
 
-```sh
+   ```
+   ADB: Connect Device
+   ```
+3. Enter `<ip>:5555`.
+
+---
+
+### 3. Disconnect Device
+
+Run:
+
+```
+ADB: Disconnect Device
+```
+
+---
+
+### 4. List Devices
+
+Run:
+
+```
+ADB: List Devices
+```
+
+---
+
+### 5. Run Shell Command
+
+Run:
+
+```
+ADB: Shell Command
+```
+
+and enter the shell command (e.g. `pm list packages`).
+
+---
+
+### 6. Generate QR for IP\:PORT
+
+1. Run:
+
+   ```
+   ADB: Generate QR
+   ```
+2. Enter your **device IP\:PORT**.
+3. A QR code will be shown (share/scan with another system for quick connect).
+
+---
+
+## ⚙️ Environment Variables
+
+* `ADB_PATH` → Custom adb binary path (optional).
+  Example:
+
+  ```bash
+  export ADB_PATH=/Users/username/Library/Android/sdk/platform-tools/adb
+  ```
+
+---
+
+## 🛠 Development
+
+Clone the repo and install dependencies:
+
+```bash
+git clone https://github.com/yourname/adb_wifi_qr.git
+cd adb_wifi_qr
 npm install
+```
+
+Build and run:
+
+```bash
 npm run compile
+code .
+```
+
+Press **F5** to launch a new Extension Development Host.
+
+---
+
+## 📦 Packaging
+
+Build `.vsix`:
+
+```bash
+vsce package
+```
+
+The `.vsix` file will be created in the project root.
+
+---
+
+## 🐞 Troubleshooting
+
+* **`no devices/emulators found`**
+  → Ensure USB debugging is enabled on your device.
+  → Check `adb devices` in terminal.
+
+* **`failed to connect to <ip>:5555`**
+  → Make sure device and PC are on the same WiFi network.
+  → Check firewall settings.
+
+* **Windows users (CRLF warnings)**
+  → Git may warn about `LF will be replaced by CRLF`. Safe to ignore.
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE.md).
