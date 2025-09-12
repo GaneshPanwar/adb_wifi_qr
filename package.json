@@ -1,0 +1,74 @@
+{
+  "name": "adb-wifi-qr",
+  "version": "0.1.2",
+  "description": "Connect Android device over ADB Wi-Fi using IP or by scanning a QR code.",
+  "license": "ISC",
+  "author": "Ganesh Panwar",
+  "icon": "assets/logo.png",
+  "galleryBanner": {
+    "color": "#1E1E1E",
+    "theme": "dark"
+  },
+  "type": "commonjs",
+  "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GaneshPanwar/adb_wifi_qr.git"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^14.18.63",
+    "typescript": "^4.0.0",
+    "vscode": "^1.1.34"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "displayName": "ADB WiFi / QR Connect",
+  "publisher": "Ganesh-Panwar",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+   
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "adbWifi.connectAutoWifi",
+        "title": "ADB: Connect Auto Wi-Fi"
+      },
+      {
+        "command": "adbWifi.connectWifi",
+        "title": "ADB: Connect via WiFi (IP)"
+      },
+      {
+        "command": "adbWifi.connectQr",
+        "title": "ADB: Connect via QR Code"
+      },
+      {
+        "command": "adbWifi.listDevices",
+        "title": "ADB: List Devices"
+      },
+      {
+        "command": "adbWifi.tcpip",
+        "title": "ADB: Enable TCP/IP on device"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "ADB WiFi Settings",
+      "properties": {
+        "adbWifi.adbPath": {
+          "type": "string",
+          "default": "",
+          "description": "Full path to adb executable (optional). If empty, extension will attempt to find adb in common SDK locations or use system PATH."
+        }
+      }
+    }
+  }
+}
