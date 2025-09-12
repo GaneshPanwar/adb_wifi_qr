@@ -1,6 +1,3 @@
-Here’s the **full `README.md` code** in markdown, ready to use 👇
-
-````markdown
 # ADB WiFi Connect VSCode Extension
 
 This Visual Studio Code extension helps you connect Android devices over **ADB WiFi** easily.  
@@ -172,5 +169,3 @@ The `.vsix` file will be created in the project root.
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE.md).
-
-````
