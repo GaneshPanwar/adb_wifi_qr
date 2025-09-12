@@ -123,7 +123,7 @@ and enter the shell command (e.g. `pm list packages`).
 Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/yourname/adb_wifi_qr.git
+git clone https://github.com/GaneshPanwar/adb_wifi_qr.git
 cd adb_wifi_qr
 npm install
 ```
