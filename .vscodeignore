@@ -1,6 +1,5 @@
 node_modules/**
 .git/**
-flutter_backend/**
 bin/**
 *.vsix
 .github/**
