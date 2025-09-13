@@ -28,27 +28,58 @@ const child_process_1 = require("child_process");
 const util = __importStar(require("util"));
 const vscode = __importStar(require("vscode"));
 exports.execPromise = util.promisify(child_process_1.exec);
+/**
+ * Run an ADB command and show an error message if the command fails.
+ * @param {string} command - The ADB command to run.
+ * @param {string} [successMessage] - The message to show to the user if the command succeeds.
+ * @param {() => void} [callback] - The callback to call if the command succeeds.
+ */
 function runCommand(command, successMessage, callback) {
     (0, child_process_1.exec)(command, (error, stdout, stderr) => {
-        if (error)
-            return vscode.window.showErrorMessage(`Error: ${stderr || error.message}`);
-        if (successMessage)
+        if (error) {
+            vscode.window.showErrorMessage(`Error: ${stderr || error.message}`);
+            return;
+        }
+        if (successMessage) {
             vscode.window.showInformationMessage(successMessage);
-        if (callback)
+        }
+        if (callback) {
             callback();
+        }
     });
 }
 exports.runCommand = runCommand;
+/**
+ * Connect to an ADB device using its IP address and port.
+ * This function will call the `adb connect` command which will connect to the device at the specified IP address and port.
+ * @param {string} ip - The IP address of the device.
+ * @param {string} port - The port number of the device.
+ * @returns {Promise<void>} A promise that resolves when the command has finished executing.
+ */
 function connectToAdbDevice(ip, port) {
     return (0, exports.execPromise)(`adb connect ${ip}:${port}`);
 }
 exports.connectToAdbDevice = connectToAdbDevice;
+/**
+ * Disconnect from all devices connected using ADB Wi-Fi.
+ * This function will call the `adb disconnect` command which will disconnect from all devices connected using ADB Wi-Fi.
+ * @returns {Promise<void>} A promise that resolves when the command has finished executing.
+ */
 function disconnectAllDevices() {
     return (0, exports.execPromise)("adb disconnect");
 }
 exports.disconnectAllDevices = disconnectAllDevices;
+/**
+ * Get the model of an Android device connected using ADB Wi-Fi.
+ * This function will call the `adb shell getprop ro.product.model` command which will return the model of the device.
+ * @param {string} ip - The IP address of the device.
+ * @param {string} port - The port number of the device.
+ * @returns {Promise<string>} A promise that resolves with the model of the device.
+ */
 async function getDeviceModel(ip, port) {
+    // Call the `adb shell getprop ro.product.model` command to get the model of the device.
     const { stdout } = await (0, exports.execPromise)(`adb -s ${ip}:${port} shell getprop ro.product.model`);
+    // Trim the output and return it.
     return stdout.trim() || "Unknown Device";
 }
 exports.getDeviceModel = getDeviceModel;

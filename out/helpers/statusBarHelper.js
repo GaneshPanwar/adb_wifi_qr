@@ -27,10 +27,20 @@ exports.updateStatusBar = exports.initStatusBar = exports.reconnectItem = export
 const vscode = __importStar(require("vscode"));
 const child_process_1 = require("child_process");
 const adbHelper_1 = require("./adbHelper");
+/**
+ * Initializes the status bar items.
+ * @param {vscode.ExtensionContext} context - Extension context.
+ */
 function initStatusBar(context) {
+    /**
+     * Status bar item to show the connection status of the devices.
+     */
     exports.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     exports.statusBarItem.text = "$(debug-disconnect) ADB: Init";
     exports.statusBarItem.show();
+    /**
+     * Status bar item to reconnect to the last connected device.
+     */
     exports.reconnectItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
     exports.reconnectItem.text = "$(refresh) Reconnect Last Device";
     exports.reconnectItem.tooltip = "Reconnect to the last connected device";
@@ -39,11 +49,18 @@ function initStatusBar(context) {
     context.subscriptions.push(exports.statusBarItem, exports.reconnectItem);
 }
 exports.initStatusBar = initStatusBar;
+/**
+ * Updates the status bar item with the current connection status of the devices.
+ * The status bar item will show the model of the connected device(s) and the number of devices connected.
+ * If no devices are connected, it will show "No Device" and the tooltip will show "No device connected".
+ * If there is an error fetching the devices, it will show "ADB: Error" and the tooltip will show the error message.
+ * @returns {void}
+ */
 function updateStatusBar() {
     (0, child_process_1.exec)("adb devices", async (error, stdout) => {
         if (error) {
             exports.statusBarItem.text = "$(debug-disconnect) ADB: Error";
-            exports.statusBarItem.tooltip = "Failed to fetch devices";
+            exports.statusBarItem.tooltip = `Failed to fetch devices: ${error.message}`;
             exports.statusBarItem.show();
             return;
         }
@@ -56,14 +73,16 @@ function updateStatusBar() {
             const labels = await Promise.all(devices.map(async (device) => {
                 const [ip, port] = device.split(":");
                 try {
+                    // Fetch device model using ADB
                     const model = await (0, adbHelper_1.getDeviceModel)(ip, port || "5555");
-                    return `${model} (${device})`;
+                    return `${model} (${device})`; // e.g. "Samsung Galaxy S21 (192.168.1.101:5555)"
                 }
                 catch {
+                    // If device model cannot be fetched, show "Unknown Device"
                     return `Unknown Device (${device})`;
                 }
             }));
-            // If multiple devices → show count
+            // If multiple devices, show count
             if (labels.length === 1) {
                 exports.statusBarItem.text = `$(device-mobile) ${labels[0].split(" ")[0]}`; // Just model
                 exports.statusBarItem.tooltip = labels[0];

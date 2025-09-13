@@ -2,15 +2,24 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// Prints help information for the script.
+///
+/// The help information includes the usage, available commands, and
+/// their respective arguments.
 void printHelp() {
   print(jsonEncode({
     'usage': 'adb_helper <command> [args]',
     'commands': {
       'devices': 'List connected adb devices',
+      /// Enables TCP/IP on the device. If no port is specified, it defaults to 5555.
       'tcpip': 'Enable tcpip on device: tcpip [port]',
+      /// Connect to the device at the specified IP address and port.
       'connect': 'Connect to device: connect <ip:port>',
+      /// Disconnect the device at the specified IP address and port.
       'disconnect': 'Disconnect device: disconnect [ip:port]',
+      /// Run the specified ADB shell command.
       'shell': 'Run adb shell command: shell <cmd>',
+      /// Auto-detect the device IP address and enable Wi-Fi ADB.
       'wifi_ip_auto': 'Auto-detect device IP and enable Wi-Fi ADB'
     }
   }));
@@ -64,6 +73,16 @@ Future<int> main(List<String> args) async {
   }
 }
 
+/// Enables TCP/IP on the device and prints the device's IP.
+///
+/// This function first lists all connected USB devices using `adb devices`.
+/// It then iterates over each device and enables TCP/IP on the device using `adb tcpip <port>`.
+/// After enabling TCP/IP, it runs the command `ip addr show wlan0` to get the device's IP.
+/// The IP is extracted from the output using a regular expression and printed to the console.
+///
+/// If the IP is not found, an error message is printed to the console.
+///
+/// Returns 0 on success.
 Future<int> _wifiIpAuto() async {
   // List connected USB devices
   final resultDevices = await Process.run(_adbPath(), ['devices']);
@@ -94,17 +113,42 @@ Future<int> _wifiIpAuto() async {
   return 0;
 }
 
+/// Returns the path to the `adb` executable.
+///
+/// The path is determined by checking the `ADB_PATH` environment variable.
+/// If the variable is not set, it defaults to `adb`.
 String _adbPath() {
-  return Platform.environment['ADB_PATH'] ?? 'adb';
+  /// The path to the `adb` executable.
+  ///
+  /// The path is determined by checking the `ADB_PATH` environment variable.
+  /// If the variable is not set, it defaults to `adb`.
+  final adbPath = Platform.environment['ADB_PATH'];
+
+  if (adbPath != null) {
+    return adbPath;
+  }
+
+  return 'adb';
 }
 
+/// Runs an ADB command and prints the output and exit code to the console.
+///
+/// [args] is the list of arguments to pass to the `adb` command.
+///
+/// Returns the exit code of the command.
 Future<int> _runAdb(List<String> args) async {
+  /// The path to the `adb` executable.
   final adbPath = _adbPath();
+
+  /// Run the ADB command.
   final result = await Process.run(adbPath, args);
+
+  /// Get the output, error, and exit code of the command.
   final out = result.stdout?.toString() ?? '';
   final err = result.stderr?.toString() ?? '';
   final exitCode = result.exitCode ?? 0;
 
+  /// Print the output and exit code to the console.
   print(jsonEncode({
     'exitCode': exitCode,
     'args': [adbPath, ...args],
@@ -112,5 +156,6 @@ Future<int> _runAdb(List<String> args) async {
     'stderr': err,
   }));
 
+  /// Return the exit code.
   return exitCode;
 }
