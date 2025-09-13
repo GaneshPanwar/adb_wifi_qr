@@ -1,9 +1,11 @@
 {
   "name": "adb-wifi-qr",
-  "version": "0.1.2",
-  "description": "Connect Android device over ADB Wi-Fi using IP or by scanning a QR code.",
+  "version": "0.1.3",
+  "description": "Connect Android device over ADB Wi-Fi using IP, auto-discovery",
   "license": "ISC",
   "author": "Ganesh Panwar",
+  "publisher": "Ganesh-Panwar",
+  "displayName": "ADB WiFi Connect",
   "icon": "assets/logo.png",
   "galleryBanner": {
     "color": "#1E1E1E",
@@ -21,42 +23,87 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^14.18.63",
+    "@vscode/test-electron": "^2.5.2",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.1",
     "typescript": "^4.0.0",
     "vscode": "^1.1.34"
   },
   "engines": {
     "vscode": "^1.60.0"
   },
-  "displayName": "ADB WiFi / QR Connect",
-  "publisher": "Ganesh-Panwar",
   "categories": [
     "Other"
   ],
   "activationEvents": [
-   
+    "onCommand:adbWifi.connectAutoWifi",
+    "onCommand:adbWifi.connectWifi",
+    "onCommand:adbWifi.connectQr",
+    "onCommand:adbWifi.listDevices",
+    "onCommand:adbWifi.tcpip",
+    "onCommand:adbWifi.disconnect",
+    "onCommand:adbWifi.connectPairing",
+    "onCommand:adbWifi.connectFromList"
   ],
   "contributes": {
     "commands": [
       {
         "command": "adbWifi.connectAutoWifi",
-        "title": "ADB: Connect Auto Wi-Fi"
+        "title": "ADB: Connect Auto Wi-Fi",
+        "icon": {
+          "light": "$(refresh)",
+          "dark": "$(refresh)"
+        }
+      },
+      {
+        "command": "adbWifi.connectPairing",
+        "title": "ADB: Connect with Pairing Code",
+        "icon": {
+          "light": "$(code)",
+          "dark": "$(code)"
+        }
       },
       {
         "command": "adbWifi.connectWifi",
-        "title": "ADB: Connect via WiFi (IP)"
-      },
-      {
-        "command": "adbWifi.connectQr",
-        "title": "ADB: Connect via QR Code"
+        "title": "ADB: Connect via Wi-Fi (IP)",
+        "icon": {
+          "light": "$(plug)",
+          "dark": "$(plug)"
+        }
       },
       {
         "command": "adbWifi.listDevices",
-        "title": "ADB: List Devices"
+        "title": "ADB: List Devices",
+        "icon": {
+          "light": "$(device-mobile)",
+          "dark": "$(device-mobile)"
+        }
+      },
+      {
+        "command": "adbWifi.disconnect",
+        "title": "ADB: Disconnect Device",
+        "icon": {
+          "light": "$(debug-disconnect)",
+          "dark": "$(debug-disconnect)"
+        }
       },
       {
         "command": "adbWifi.tcpip",
-        "title": "ADB: Enable TCP/IP on device"
+        "title": "ADB: Enable TCP/IP on Device",
+        "icon": {
+          "light": "$(broadcast)",
+          "dark": "$(broadcast)"
+        }
+      },
+      {
+        "command": "adbWifi.connectFromList",
+        "title": "ADB: Connect to Device from List",
+        "icon": {
+          "light": "$(broadcast)",
+          "dark": "$(broadcast)"
+        }
       }
     ],
     "configuration": {
