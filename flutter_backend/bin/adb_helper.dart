@@ -33,7 +33,8 @@ Future<int> main(List<String> args) async {
         return await _runAdb(['tcpip', port]);
       case 'connect':
         if (args.length < 2) {
-          print(jsonEncode({'error': 'missing_arg', 'message': 'connect requires ip:port'}));
+          print(jsonEncode(
+              {'error': 'missing_arg', 'message': 'connect requires ip:port'}));
           return 2;
         }
         return await _runAdb(['connect', args[1]]);
@@ -43,14 +44,18 @@ Future<int> main(List<String> args) async {
         return await _runAdb(a);
       case 'shell':
         if (args.length < 2) {
-          print(jsonEncode({'error': 'missing_arg', 'message': 'shell requires command'}));
+          print(jsonEncode(
+              {'error': 'missing_arg', 'message': 'shell requires command'}));
           return 2;
         }
         return await _runAdb(['shell', ...args.sublist(1)]);
       case 'wifi_ip_auto':
         return await _wifiIpAuto();
       default:
-        print(jsonEncode({'error': 'unknown_command', 'message': 'Unknown command: $command'}));
+        print(jsonEncode({
+          'error': 'unknown_command',
+          'message': 'Unknown command: $command'
+        }));
         return 3;
     }
   } catch (e) {
@@ -72,9 +77,10 @@ Future<int> _wifiIpAuto() async {
       await Process.run(_adbPath(), ['-s', serial, 'tcpip', '5555']);
 
       // Get device IP from wlan0
-      final ipResult = await Process.run(
-          _adbPath(), ['-s', serial, 'shell', 'ip', '-f', 'inet', 'addr', 'show', 'wlan0']);
-      final ipMatch = RegExp(r'inet (\d+\.\d+\.\d+\.\d+)/').firstMatch(ipResult.stdout ?? '');
+      final ipResult = await Process.run(_adbPath(),
+          ['-s', serial, 'shell', 'ip', '-f', 'inet', 'addr', 'show', 'wlan0']);
+      final ipMatch = RegExp(r'inet (\d+\.\d+\.\d+\.\d+)/')
+          .firstMatch(ipResult.stdout ?? '');
 
       if (ipMatch != null) {
         final ip = ipMatch.group(1);

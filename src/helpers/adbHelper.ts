@@ -24,4 +24,3 @@ export async function getDeviceModel(ip: string, port: string): Promise<string> 
   const { stdout } = await execPromise(`adb -s ${ip}:${port} shell getprop ro.product.model`);
   return stdout.trim() || "Unknown Device";
 }
-
