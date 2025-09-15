@@ -1,19 +1,21 @@
+"use strict";
 /**
  * Store all keys for extension state management
  *
  * These keys are used to store the state of the extension in
  * the VSCode configuration.
  */
-
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customADBPathKey = exports.lastUsedPort = exports.lastUsedIP = exports.allPackages = void 0;
 /**
  * Key to store the last used app package name
  *
  * @returns {string} The key to store the last used app package name
  */
-export function allPackages() {
-  return 'last_app_package_name'
+function allPackages() {
+    return 'last_app_package_name';
 }
-
+exports.allPackages = allPackages;
 /**
  * Key to store the last used IP address
  *
@@ -21,10 +23,10 @@ export function allPackages() {
  *
  * @returns {string} The key to store the last used IP address
  */
-export function lastUsedIP(): string {
-  return 'lastIPAddress'
+function lastUsedIP() {
+    return 'lastIPAddress';
 }
-
+exports.lastUsedIP = lastUsedIP;
 /**
  * Key to store the last used device port
  *
@@ -32,10 +34,10 @@ export function lastUsedIP(): string {
  *
  * @returns {string} The key to store the last used device port
  */
-export function lastUsedPort(): string {
-  return 'last_used_port'
+function lastUsedPort() {
+    return 'last_used_port';
 }
-
+exports.lastUsedPort = lastUsedPort;
 /**
  * Key to store the custom ADB path set by the user
  *
@@ -43,6 +45,8 @@ export function lastUsedPort(): string {
  *
  * @returns {string} The key to store the custom ADB path
  */
-export function customADBPathKey(): string {
-  return 'user_adb_path'
+function customADBPathKey() {
+    return 'user_adb_path';
 }
+exports.customADBPathKey = customADBPathKey;
+//# sourceMappingURL=global-state-keys.js.map

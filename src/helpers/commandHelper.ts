@@ -121,6 +121,8 @@ export function disconnect(updateStatusBar: () => void): vscode.Disposable {
 
 /**
  * Register command to list all connected devices.
+ * @param {vscode.ExtensionContext} _context - Extension context.
+ * @param {() => void} _updateStatusBar - Function to update status bar.
  * @returns {vscode.Disposable} Disposable object.
  */
 
@@ -129,6 +131,11 @@ export function listDevices(
   _updateStatusBar: () => void
 ): vscode.Disposable {
   return vscode.commands.registerCommand("adbWifi.listDevices", async () => {
+    /**
+     * Get list of all connected devices on the network.
+     * This function will return an array of strings, where each string is in the format
+     * "IP:PORT". If no devices are found, it will show an information message to the user.
+     */
     const devices = await getIPAddressList();
 
     if (devices.length === 0) {
@@ -136,7 +143,12 @@ export function listDevices(
       return;
     }
 
-    // Build QuickPick items with friendly labels
+    /**
+     * Build QuickPick items with friendly labels.
+     * This function will take the list of devices and convert it into an array of QuickPickItems.
+     * The label of each item will be the model name of the device, while the description will be the raw
+     * IP address and port of the device.
+     */
     const quickPickItems = await Promise.all(
       devices.map(async (device) => {
         const [ip, port] = device.split(":");
@@ -153,6 +165,11 @@ export function listDevices(
       })
     );
 
+    /**
+     * Show QuickPick dialog to user.
+     * This function will show a QuickPick dialog to the user with the list of devices. The user can select
+     * a device to connect to, and the extension will attempt to connect to the selected device.
+     */
     const selected = await vscode.window.showQuickPick(quickPickItems, {
       placeHolder: "Select a device to connect",
     });
