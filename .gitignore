@@ -5,7 +5,7 @@ yarn.lock
 pnpm-lock.yaml
 
 # VS Code extension packages
-*.vsix
+
 
 # TypeScript build output
 out/
